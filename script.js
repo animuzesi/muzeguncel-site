@@ -300,8 +300,8 @@ function applyResponsiveSceneVars() {
  */
 function setKeyState(event, isDown) {
   const key = event.key.toLowerCase();
-  if (key === "a") inputSources.keyboard.left = isDown;
-  if (key === "d") inputSources.keyboard.right = isDown;
+  if (key === "a" || key === "arrowleft") inputSources.keyboard.left = isDown;
+  if (key === "d" || key === "arrowright") inputSources.keyboard.right = isDown;
   if (key === SECRET_BOOST_KEY) inputSources.keyboard.boost = isDown;
   syncCombinedKeys();
 }
@@ -827,12 +827,16 @@ function closePhotoView() {
   const closingMemoryId = Number(photoViewImage.dataset.memoryId);
   isPhotoViewOpen = false;
   photoView.classList.remove("open");
-  photoView.hidden = true;
   updateMobileControlsUI();
+
+  // Let the CSS close transition play before hiding the element.
+  photoView.addEventListener("transitionend", () => {
+    photoView.hidden = true;
+  }, { once: true });
 
   // Trigger the closing dedication after the visitor finishes the final photo.
   if (closingMemoryId === ENDING_TRIGGER_PHOTO_ID && !hasEndingBeenShown) {
-    setTimeout(openEndingPanel, 520);
+    setTimeout(openEndingPanel, 560);
   }
 }
 
@@ -895,9 +899,17 @@ function handleKeyDown(event) {
     return;
   }
 
+  // Prevent arrow keys from scrolling the page while the game is active.
+  if (key === "arrowleft" || key === "arrowright" || key === "arrowup" || key === "arrowdown") {
+    event.preventDefault();
+  }
+
   setKeyState(event, true);
 
   if (key === "e" && !event.repeat) {
+    // preventDefault stops the browser from typing "e" into the ticket input
+    // that receives focus inside triggerInteractionAction → openTicketPanel.
+    event.preventDefault();
     triggerInteractionAction();
   }
   if (key === "escape" && isIntroOpen) {
