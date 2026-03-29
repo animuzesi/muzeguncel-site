@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>130323 Müzesi</title>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-root" hidden>
+      <!-- Müze içini bilet doğrulanana kadar örten nazik karartma perdesi -->
+      <div id="gallery-veil" class="gallery-veil" aria-hidden="true"></div>
+      <!-- Viewport, kameranın gördüğü alan -->
+      <div id="viewport" class="viewport">
+        <!-- Dünya viewport'tan daha geniş -->
+        <div id="world" class="world">
+          <div class="background-layer"></div>
+          <div class="ceiling-layer"></div>
+          <div class="ambient-layer"></div>
+          <div class="wall-layer"></div>
+          <div id="entrance-layer" class="entrance-layer"></div>
+          <div id="memory-layer" class="memory-layer"></div>
+          <div class="floor"></div>
+          <div id="character" class="character" aria-label="Oyuncu karakteri"></div>
+        </div>
+      </div>
+      <p id="interact-hint" class="interact-hint" hidden>E ile incele</p>
+      <p id="turnstile-warning" class="turnstile-warning" hidden>Önce gişeden bilet almalısın.</p>
+      <p class="help">A ve D tuşları ile hareket edebilirsin.</p>
+      <div id="mobile-controls" class="mobile-controls" hidden aria-hidden="true">
+        <div class="mobile-controls-left" aria-label="Hareket kontrolleri">
+          <button
+            id="mobile-move-left"
+            class="mobile-control-button mobile-control-move"
+            type="button"
+            aria-label="Sola git"
+          >
+            ←
+          </button>
+          <button
+            id="mobile-move-right"
+            class="mobile-control-button mobile-control-move"
+            type="button"
+            aria-label="Sağa git"
+          >
+            →
+          </button>
+        </div>
+        <div class="mobile-controls-right" aria-label="Etkileşim kontrolleri">
+          <button
+            id="mobile-action"
+            class="mobile-control-button mobile-control-action"
+            type="button"
+            aria-label="Etkileşim"
+          >
+            E
+          </button>
+          <button
+            id="mobile-close"
+            class="mobile-control-button mobile-control-close"
+            type="button"
+            aria-label="Kapat"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <section id="access-gate" class="access-gate" aria-label="Müze giriş ekranı">
+      <div id="access-float-layer" class="access-float-layer" aria-hidden="true"></div>
+      <div class="access-panel">
+        <img
+          src="assets/logo.png"
+          alt="Müze logosu"
+          class="access-logo"
+          onerror="this.style.display='none'"
+        />
+        <h1 class="access-title">130323 Müzesi</h1>
+        <p class="access-subtitle">Sana özel bir anı koleksiyonu hazırladım.</p>
+        <button id="access-enter" class="access-enter" type="button">Müzeye ilerle</button>
+      </div>
+    </section>
+
+    <div id="ticket-panel" class="ticket-panel" hidden aria-modal="true" role="dialog" aria-label="Bilet doğrulama">
+      <div class="ticket-panel-box">
+        <h2 class="ticket-panel-title">Bilet Doğrulama</h2>
+        <p class="ticket-panel-hint">Bilet numaranı girerek içeri geçebilirsin.</p>
+        <input
+          id="ticket-input"
+          class="ticket-panel-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Bilet numarası"
+          aria-label="Bilet numarası"
+        />
+        <button id="ticket-submit" class="ticket-panel-submit" type="button">Doğrula</button>
+        <p id="ticket-error" class="ticket-panel-error" hidden>Bilet numarası hatalı. Tekrar dene.</p>
+      </div>
+    </div>
+
+    <div id="memory-modal" class="modal" hidden>
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="memory-title">
+        <button id="modal-close" class="modal-close" type="button" aria-label="Kapat">×</button>
+        <h2 id="memory-title">Bir Anı</h2>
+        <p><strong>Tarih:</strong> <span id="memory-date">Tarih burada</span></p>
+        <p id="memory-description">Bu anının açıklaması burada olacak.</p>
+        <p class="memory-image-path" hidden><strong id="memory-asset-label">Görsel:</strong> <span id="memory-image-path">-</span></p>
+      </div>
+    </div>
+
+    <div id="intro-panel" class="modal" hidden>
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+        <button id="intro-close" class="modal-close" type="button" aria-label="Kapat">×</button>
+        <h2 id="intro-title">Hoş geldin</h2>
+        <p>
+          Bu müze, birlikte biriktirdiğimiz anılardan oluşuyor.
+          A ve D tuşları ile yürüyebilir, E tuşu ile sergileri inceleyebilirsin.
+        </p>
+      </div>
+    </div>
+
+    <div id="photo-view" class="photo-view" hidden>
+      <div class="photo-view-overlay"></div>
+      <div class="photo-view-content" role="dialog" aria-modal="true" aria-labelledby="photo-view-title">
+        <button id="photo-view-close" class="photo-view-close" type="button" aria-label="Kapat">×</button>
+        <div class="photo-view-image-wrap">
+          <img id="photo-view-image" class="photo-view-image" src="" alt="Anı fotoğrafı" />
+        </div>
+        <aside class="photo-view-panel">
+          <h2 id="photo-view-title">Bir Anı</h2>
+          <p><strong>Tarih:</strong> <span id="photo-view-date">Tarih burada</span></p>
+          <p id="photo-view-description">Bu anının açıklaması burada olacak.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Müze kapanış kartı: son fotoğraftan çıkıldıktan sonra gösterilir -->
+
+    <div id="ending-panel" class="ending-panel" hidden aria-modal="true" role="dialog" aria-labelledby="ending-title">
+      <div class="ending-vignette"></div>
+      <div class="ending-card">
+        <div class="ending-rule"></div>
+        <p class="ending-eyebrow">13 Mart 2026</p>
+        <h2 id="ending-title" class="ending-title">1096 Gün</h2>
+        <p class="ending-body">
+          Bu müze senin için kuruldu.<br>
+          Her fotoğraf, her obje, her etiket —<br>
+          hepsi sadece sana ait.
+        </p>
+        <p class="ending-closing">
+          Seni seviyorum.
+        </p>
+        <div class="ending-rule ending-rule--bottom"></div>
+        <button id="ending-close" class="ending-close" type="button" aria-label="Kapat">Kapat</button>
+      </div>
+    </div>
+
+    <script src="data/memories.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
