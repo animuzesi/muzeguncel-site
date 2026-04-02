@@ -6,6 +6,7 @@ const accessGate = document.getElementById("access-gate");
 const accessFloatLayer = document.getElementById("access-float-layer");
 const accessEnter = document.getElementById("access-enter");
 const galleryVeil = document.getElementById("gallery-veil");
+const teaserPeek = document.getElementById("teaser-peek");
 const ticketPanel = document.getElementById("ticket-panel");
 const ticketInput = document.getElementById("ticket-input");
 const ticketSubmit = document.getElementById("ticket-submit");
@@ -57,7 +58,7 @@ const ENTRANCE_BUBBLE_DISTANCE = 230;
 const TURNSTILE_BLOCK_X = 1170;
 const TURNSTILE_WARNING_DISTANCE = 88;
 // Koridor yerleşimi: tek bir imleç (currentX) bu aralıklarla ilerler.
-const EXHIBIT_START_X = 2600;
+const EXHIBIT_START_X = 1410;
 const EXHIBIT_MIN_SPACING = 220;
 const PHOTO_TO_PHOTO_SPACING = 260;
 const PHOTO_TO_OBJECT_SPACING = 320;
@@ -90,7 +91,12 @@ const FRAME_FORMATS = {
   wide: { aspect: 16 / 9, baseHeight: 138 },
 };
 
-const FRAME_ROTATIONS = [-0.3, 0.2, -0.2, 0.3, -0.25, 0.2];
+const FRAME_ROTATIONS = [0, 0, 0, 0, 0, 0];
+const LAMP_RAIL_Y = 24;
+const LAMP_APERTURE_OFFSET = 84;
+const MIN_SPOTLIGHT_CONE_HEIGHT = 88;
+const MIN_SPOTLIGHT_CONE_WIDTH = 110;
+const MAX_SPOTLIGHT_CONE_WIDTH = 176;
 const FRAME_ASSETS = {
   portrait: {
     primary: "assets/objects/frame_portrait.png",
@@ -138,7 +144,7 @@ const TAPE_IMAGE_PATH = "assets/objects/tape/teyp.png";
 const TAPE_AUDIO_PATH = "assets/audio/memory_song.mp3";
 const PRELUDE_TAPE_IMAGE_PATH = "assets/objects/tape/teyp.png";
 const PRELUDE_TAPE_AUDIO_PATH = "assets/audio/prelude_song.mp3";
-const PRELUDE_TAPE_OFFSET_FROM_FIRST_FRAME = 210;
+const PRELUDE_TAPE_OFFSET_FROM_FIRST_FRAME = 320;
 const REQUIRED_TICKET_CODE = "1096gün";
 
 let worldWidth = MIN_WORLD_WIDTH;
@@ -176,12 +182,12 @@ let yusufFrameTimer = 0;
 
 const PLAYER_ANIMATIONS = {
   idle: {
-    src: "assets/character/female_idle.png",
+    src: "assets/character/character_idle.png",
     frames: 7,
     fps: 8,
   },
   walk: {
-    src: "assets/character/female_walk.png",
+    src: "assets/character/character_walk.png",
     frames: 12,
     fps: 14,
   },
@@ -442,6 +448,7 @@ function tryTicketCode() {
   if (entered === REQUIRED_TICKET_CODE) {
     closeTicketPanel();
     if (galleryVeil) galleryVeil.classList.add("lifted");
+    if (teaserPeek) teaserPeek.classList.add("hidden");
     ticketPurchased = true;
     updateEntranceStateVisuals();
     openIntroPanel();
@@ -784,6 +791,7 @@ function closeEndingPanel() {
 function updateEntranceStateVisuals() {
   if (!entranceZoneElement) return;
   entranceZoneElement.classList.toggle("ticket-ready", ticketPurchased);
+  if (gameRoot) gameRoot.classList.toggle("museum-lit", false);
 
   // Tripod döndürme: bilet alındığı anda kollar +120° döner.
   // Bu fonksiyon bilet alımında tetiklenir; oyuncunun turnikeye yaklaşması beklenmez.
@@ -792,7 +800,15 @@ function updateEntranceStateVisuals() {
     tripodRotating = true;
     tripodAngle = 120;
     tripodHubEl.style.transform = `rotate(${tripodAngle}deg)`;
+    setTimeout(() => {
+      if (gameRoot) gameRoot.classList.add("museum-lit");
+    }, 240);
     setTimeout(() => { tripodRotating = false; }, 650);
+    return;
+  }
+
+  if (ticketPurchased && gameRoot) {
+    gameRoot.classList.add("museum-lit");
   }
 }
 
@@ -869,10 +885,22 @@ function closeShelfZoom() {
 
 function updateShelfZoom(dt) {
   const targetScale = isShelfZoomOpen ? 2.45 : 1;
-  const smooth = Math.min(1, dt * 8);
+  // Zoom-out çok daha hızlı tamamlanır; karakter daha erken geri döner.
+  const smooth = Math.min(1, dt * (isShelfZoomOpen ? 8 : 20));
   shelfZoomScale += (targetScale - shelfZoomScale) * smooth;
 
-  if (!isShelfZoomOpen && shelfZoomScale <= 1.001) {
+  // Zoom-out: kamerayı odak noktasına hizala ki zoom→kamera geçişi
+  // görsel konumda atlama olmadan seamless gerçekleşsin.
+  if (!isShelfZoomOpen && shelfZoomFocus) {
+    const maxCameraX = Math.max(0, worldWidth - viewport.clientWidth);
+    camera.x = clamp(
+      shelfZoomFocus.worldX - viewport.clientWidth * 0.5,
+      0,
+      maxCameraX
+    );
+  }
+
+  if (!isShelfZoomOpen && shelfZoomScale <= 1.0001) {
     shelfZoomScale = 1;
     shelfZoomFocus = null;
   }
@@ -1017,6 +1045,11 @@ if (ticketSubmit) {
   ticketSubmit.addEventListener("click", tryTicketCode);
 }
 
+const ticketClose = document.getElementById("ticket-close");
+if (ticketClose) {
+  ticketClose.addEventListener("click", closeTicketPanel);
+}
+
 if (ticketInput) {
   ticketInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -1136,6 +1169,42 @@ function createFrameLabelElement(memory) {
 
   label.append(title, subtitle);
   return label;
+}
+
+function createMuseumLightElement({ centerX, targetTop, targetHeight, beamWidth, variant = "frame" }) {
+  const light = document.createElement("div");
+  light.className = `museum-light museum-light--${variant}`;
+
+  const apertureTop = LAMP_RAIL_Y + scaleValue(LAMP_APERTURE_OFFSET);
+  const highlightY = targetTop + Math.max(scaleValue(26), Math.round(targetHeight * 0.16));
+  const beamHeight = Math.max(
+    scaleValue(MIN_SPOTLIGHT_CONE_HEIGHT),
+    Math.round(highlightY - apertureTop)
+  );
+  const wallGlowTop = targetTop - Math.round(scaleValue(18));
+  const wallGlowHeight = Math.max(scaleValue(130), Math.round(targetHeight * 0.72));
+  const floorGlowTop = targetTop + targetHeight + scaleValue(18);
+  const floorGlowWidth = Math.round(beamWidth * 0.9);
+
+  light.style.left = `${Math.round(centerX)}px`;
+  light.style.setProperty("--fixture-top", `${LAMP_RAIL_Y}px`);
+  light.style.setProperty("--beam-top", `${Math.round(apertureTop)}px`);
+  light.style.setProperty("--beam-height", `${beamHeight}px`);
+  light.style.setProperty("--beam-width", `${beamWidth}px`);
+  light.style.setProperty("--wall-glow-top", `${wallGlowTop}px`);
+  light.style.setProperty("--wall-glow-height", `${wallGlowHeight}px`);
+  light.style.setProperty("--wall-glow-width", `${Math.round(beamWidth * 1.22)}px`);
+  light.style.setProperty("--floor-glow-top", `${floorGlowTop}px`);
+  light.style.setProperty("--floor-glow-width", `${floorGlowWidth}px`);
+
+  const beam = document.createElement("div");
+  beam.className = "museum-light-beam";
+
+  const fixture = document.createElement("div");
+  fixture.className = "museum-light-fixture";
+
+  light.append(beam, fixture);
+  return light;
 }
 
 /**
@@ -1319,6 +1388,13 @@ function ensureWorldCapacity(requiredRightX) {
  */
 function buildMemoryEnvironment() {
   memoryLayer.innerHTML = "";
+  const lightLayer = document.createElement("div");
+  lightLayer.className = "memory-light-layer";
+  const exhibitLayer = document.createElement("div");
+  exhibitLayer.className = "memory-exhibit-layer";
+  const labelLayer = document.createElement("div");
+  labelLayer.className = "memory-label-layer";
+  memoryLayer.append(lightLayer, exhibitLayer, labelLayer);
   exhibitLayouts = [];
   memories = loadMemories();
   const sceneScale = getSceneScale();
@@ -1354,7 +1430,24 @@ function buildMemoryEnvironment() {
 
       element.style.left = `${x}px`;
       element.style.bottom = `${fanusExhibitBottom}px`;
-      memoryLayer.appendChild(element);
+      exhibitLayer.appendChild(element);
+
+      {
+        const fanusTopFromVP = viewport.clientHeight - fanusExhibitBottom - height;
+        const beamWidth = clamp(
+          Math.round(width * 0.7),
+          scaleValue(MIN_SPOTLIGHT_CONE_WIDTH),
+          scaleValue(MAX_SPOTLIGHT_CONE_WIDTH)
+        );
+        const light = createMuseumLightElement({
+          centerX: x + width / 2,
+          targetTop: fanusTopFromVP,
+          targetHeight: height,
+          beamWidth,
+          variant: "fanus",
+        });
+        lightLayer.appendChild(light);
+      }
 
       exhibitLayouts.push({
         id: memory.id,
@@ -1381,7 +1474,7 @@ function buildMemoryEnvironment() {
           ensureWorldCapacity(tapeX + tapeExhibitSize.width);
           tapeElement.style.left = `${tapeX}px`;
           tapeElement.style.bottom = `${tapeExhibitBottom}px`;
-          memoryLayer.appendChild(tapeElement);
+          exhibitLayer.appendChild(tapeElement);
 
           exhibitLayouts.push({
             id: tapeMemory.id,
@@ -1429,33 +1522,29 @@ function buildMemoryEnvironment() {
     frame.style.width = `${size.width}px`;
     frame.style.height = `${size.height}px`;
 
-    // ── Per-frame spotlight alignment ──────────────────────────────────────
-    // Goal: every lamp aperture at the SAME Y on screen, beams adapt to distance.
-    // Lamp element = stem(56px) + housing(32px) = 88px tall at scale=1.
-    // We anchor the lamp element top at LAMP_RAIL_Y (just at the ceiling rail).
-    // Cone starts at the aperture (lamp bottom) and reaches the frame centre.
-    {
-      const LAMP_RAIL_Y = 18;                              // px below viewport top
-      const lampElemH = scaleValue(56 + 32);               // stem + housing, scaled
-      const frameTopFromVP = viewport.clientHeight - bottom - size.height;
-      const lampTopFromFrame = LAMP_RAIL_Y - frameTopFromVP;
-      const apertureFromVP  = LAMP_RAIL_Y + lampElemH;
-      const frameCentreFromVP = frameTopFromVP + size.height / 2;
-      const coneH = Math.max(scaleValue(80), Math.round(frameCentreFromVP - apertureFromVP));
-      const coneW = Math.round(scaleValue(120) + coneH * 0.55);
-      frame.style.setProperty("--lamp-top",  `${Math.round(lampTopFromFrame)}px`);
-      frame.style.setProperty("--cone-top",  `${Math.round(apertureFromVP - frameTopFromVP)}px`);
-      frame.style.setProperty("--cone-h",    `${coneH}px`);
-      frame.style.setProperty("--cone-w",    `${coneW}px`);
-    }
-    // ───────────────────────────────────────────────────────────────────────
+    exhibitLayer.appendChild(frame);
 
-    memoryLayer.appendChild(frame);
+    {
+      const frameTopFromVP = viewport.clientHeight - bottom - size.height;
+      const beamWidth = clamp(
+        Math.round(size.width * 0.68),
+        scaleValue(MIN_SPOTLIGHT_CONE_WIDTH),
+        scaleValue(MAX_SPOTLIGHT_CONE_WIDTH)
+      );
+      const light = createMuseumLightElement({
+        centerX: x + size.width / 2,
+        targetTop: frameTopFromVP,
+        targetHeight: size.height,
+        beamWidth,
+        variant: "frame",
+      });
+      lightLayer.appendChild(light);
+    }
 
     const label = createFrameLabelElement(memory);
     label.style.left = `${x + size.width / 2}px`;
     label.style.bottom = `${Math.max(scaleValue(FRAME_LABEL_MIN_BOTTOM), bottom - scaleValue(FRAME_LABEL_OFFSET))}px`;
-    memoryLayer.appendChild(label);
+    labelLayer.appendChild(label);
 
     exhibitLayouts.push({
       id: memory.id,
@@ -1468,7 +1557,7 @@ function buildMemoryEnvironment() {
     });
 
     if (!preludeTapeInserted) {
-      const preludeTapeX = Math.max(scaleValue(40), x - preludeTapeOffset);
+      const preludeTapeX = x + preludeTapeOffset;
       const preludeTapeElement = createTapeExhibitElement(PRELUDE_TAPE_IMAGE_PATH);
       const preludeTapeMemory = {
         id: "tape_exhibit_prelude_01",
@@ -1479,7 +1568,7 @@ function buildMemoryEnvironment() {
       ensureWorldCapacity(preludeTapeX + tapeExhibitSize.width);
       preludeTapeElement.style.left = `${preludeTapeX}px`;
       preludeTapeElement.style.bottom = `${tapeExhibitBottom}px`;
-      memoryLayer.appendChild(preludeTapeElement);
+      exhibitLayer.appendChild(preludeTapeElement);
       exhibitLayouts.push({
         id: preludeTapeMemory.id,
         x: preludeTapeX,
@@ -1510,11 +1599,9 @@ function buildMemoryEnvironment() {
     trackEl.className = "lamp-track";
     trackEl.style.left = `${Math.round(trackStartX)}px`;
     trackEl.style.width = `${Math.round(Math.max(0, trackEndX - trackStartX))}px`;
-    // Align track top with the lamp mount rail (17 = LAMP_RAIL_Y 18 minus 1 px so the
-    // mount bracket visually sits on top of the rail rather than beside it).
-    trackEl.style.top = "17px";
-    // Prepend so it renders behind all frame elements (which paint in DOM order after it).
-    memoryLayer.prepend(trackEl);
+    // Align track top with the lamp mount rail so every fixture shares the same wall line.
+    trackEl.style.top = `${LAMP_RAIL_Y - 1}px`;
+    lightLayer.prepend(trackEl);
   }
   // ───────────────────────────────────────────────────────────────────────────
 
@@ -1600,8 +1687,10 @@ function updateCamera(dt) {
  * Dünya ve karakterin ekrana çizimini uygular.
  */
 function render() {
-  // Inceleme zoom'unda oyuncu gorunmesin, sadece zoom bolgesi odakta kalsin.
-  character.hidden = isShelfZoomOpen;
+  // Zoom-in: karakter gizlenir. Zoom-out: scale ~1.08'e düşünce hemen geri döner
+  // (~150ms), dünya henüz %8 büyük olduğundan fark edilmez.
+  // Kamera/oyuncu senkronizasyonu ise scale tam 1'e ulaşana kadar devam eder.
+  character.hidden = isShelfZoomOpen || shelfZoomScale > 1.08;
   character.style.left = `${player.x}px`;
   if (shelfZoomFocus && shelfZoomScale > 1.001) {
     const effectiveZoomScale = shelfZoomScale;
@@ -1713,13 +1802,20 @@ function update(now) {
   const dt = (now - lastTime) / 1000;
   lastTime = now;
 
-  if (!isPhotoViewOpen && !isShelfZoomOpen && !isTicketPanelOpen) {
+  // Zoom geçişi sırasında (açılırken veya kapanırken) oyuncu hareketi dondurulur.
+  const zoomActive = isShelfZoomOpen || shelfZoomScale > 1.001;
+  if (!isPhotoViewOpen && !zoomActive && !isTicketPanelOpen) {
     updatePlayer(dt);
   }
   updateCharacterSpriteAnimation(dt);
   updateYusufAnimation(dt);
-  updateCamera(dt);
+  // updateShelfZoom önce çalışır; kamerayı odak noktasına senkronlar.
   updateShelfZoom(dt);
+  // Kamera takibi yalnızca zoom bitmişken çalışır; zoom sırasında camera.x
+  // updateShelfZoom tarafından yönetilir.
+  if (!zoomActive) {
+    updateCamera(dt);
+  }
   render();
   updateInteractions();
   updateHelpVisibility();
@@ -1749,6 +1845,9 @@ initializeScene();
 initializeTapeAudio();
 buildEntranceEnvironment();
 buildMemoryEnvironment();
+if (teaserPeek && memories.length > 0) {
+  teaserPeek.style.backgroundImage = `url('${memories[0].image}')`;
+}
 initializeModalSystem();
 initializeIntroPanelSystem();
 updateEntranceStateVisuals();

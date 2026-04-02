@@ -5,7 +5,7 @@
   --wall-bottom-offset: var(--floor-height);
   --ceiling-zone-height: 18vh;
   --wall-top-offset: 0px;
-  --ambient-dim: rgba(0, 0, 0, 0.22);
+  --ambient-dim: rgba(0, 0, 0, 0.30);
   --gallery-bg-top: #1f262d;
   --gallery-bg-bottom: #2a323b;
   --gallery-wall-top: #2c3440;
@@ -24,21 +24,21 @@
   --wall-texture-size: 760px;
   --wall-texture-strength: 0.12;
   /* Spot ışık ayarları: gerçekçi galeri hissi için bu değişkenleri düzenleyebilirsin. */
-  --spotlight-source: rgba(255, 244, 214, 0.82);
-  --spotlight-core: rgba(255, 242, 210, 0.34);
-  --spotlight-mid: rgba(255, 241, 206, 0.13);
-  --spotlight-falloff: rgba(255, 241, 206, 0.05);
-  --spotlight-width: 300px;
-  --spotlight-height: 350px;
-  --spotlight-blur: 8px;
-  --spotlight-feather: 0.78;
+  --spotlight-source: rgba(255, 244, 214, 0.58);
+  --spotlight-core: rgba(255, 241, 206, 0.34);
+  --spotlight-mid: rgba(255, 238, 200, 0.17);
+  --spotlight-falloff: rgba(255, 237, 196, 0.072);
+  --spotlight-width: 240px;
+  --spotlight-height: 320px;
+  --spotlight-blur: 12px;
+  --spotlight-feather: 0.82;
   --spotlight-cone-top: -304px;
   --spotlight-lamp-top: -296px;
-  --spotlight-lamp-size: 32px;
+  --spotlight-lamp-size: 36px;
   --spotlight-lamp-stem: 56px;
   /* Fixture housing dimensions */
-  --fixture-housing-w: 28px;
-  --fixture-mount-w:   44px;
+  --fixture-housing-w: 52px;
+  --fixture-mount-w: 84px;
   --frame-shadow:
     0 10px 24px rgba(0, 0, 0, 0.26),
     0 20px 34px rgba(0, 0, 0, 0.22);
@@ -47,7 +47,7 @@
   --frame-bevel-light: rgba(255, 239, 214, 0.28);
   --frame-bevel-dark: rgba(29, 22, 14, 0.26);
   --frame-mounted-shadow: rgba(0, 0, 0, 0.2);
-  --art-warm-light: rgba(255, 241, 208, 0.15);
+  --art-warm-light: rgba(255, 241, 206, 0.24);
   --photo-view-overlay: rgba(10, 14, 22, 0.58);
   --photo-view-anim-ms: 500ms;
   --ticket-desk-width: 720px;
@@ -209,13 +209,41 @@ body.mobile-ui-active .mobile-control-button {
 
 /* top accent bar — same museum plaque feel as modal-panel */
 .ticket-panel-box::before {
-  content: "";
+  content: none;
   position: absolute;
   top: 0; left: 16px; right: 16px;
   height: 2px;
   border-radius: 0 0 2px 2px;
   background: linear-gradient(90deg, transparent, rgba(155, 130, 100, 0.55), transparent);
   opacity: 0.7;
+}
+
+.ticket-panel-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #b0997f;
+  opacity: 0.65;
+  border-radius: 50%;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.ticket-panel-close:hover,
+.ticket-panel-close:focus-visible {
+  opacity: 1;
+  color: #2c261f;
+  outline: none;
 }
 
 .ticket-panel-title {
@@ -323,7 +351,7 @@ body.mobile-ui-active .mobile-control-button {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 55%, transparent 30%, rgba(4, 8, 14, 0.30) 100%);
+  background: radial-gradient(ellipse at 50% 52%, transparent 22%, rgba(4, 8, 14, 0.52) 100%);
   pointer-events: none;
   z-index: 30;
 }
@@ -344,13 +372,40 @@ body.mobile-ui-active .mobile-control-button {
     90deg,
     transparent                    22%,
     rgba(4, 8, 14, 0.42)           42%,
-    rgba(4, 8, 14, 0.68)           64%,
-    rgba(4, 8, 14, 0.84)          100%
+    rgba(4, 8, 14, 0.64)           64%,
+    rgba(4, 8, 14, 0.80)          100%
   );
   transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gallery-veil.lifted {
+  opacity: 0;
+}
+
+/* ── Teaser peek ────────────────────────────────────────────────────────────
+   Bilet alınmadan önce müze içinden kısmen görünen gizemli çerçeve ipucu.
+   Viewport'a sabitlenmiş, sağ kenarda yarı görünür; bilet sonrası silinir.
+   ───────────────────────────────────────────────────────────────────────── */
+.teaser-peek {
+  position: fixed;
+  right: -7%;
+  top: 50%;
+  transform: translateY(-54%);
+  width: calc(160px * var(--scene-scale));
+  height: calc(220px * var(--scene-scale));
+  background-size: cover;
+  background-position: center;
+  border: calc(6px * var(--scene-scale)) solid rgba(210, 190, 160, 0.35);
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 20px rgba(0, 0, 0, 0.4);
+  filter: brightness(0.15) saturate(0.3);
+  z-index: 6;
+  pointer-events: none;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.teaser-peek.hidden {
   opacity: 0;
 }
 
@@ -431,11 +486,12 @@ body.mobile-ui-active .mobile-control-button {
   right: 0;
   bottom: 0;
   height: 2px;
+  /* Warm ivory edge where ceiling meets wall — simulates lamp warmth hitting crown molding */
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.08) 18%,
-    rgba(255, 255, 255, 0.08) 82%,
+    rgba(255, 228, 162, 0.16) 18%,
+    rgba(255, 228, 162, 0.16) 82%,
     transparent 100%
   );
 }
@@ -445,16 +501,15 @@ body.mobile-ui-active .mobile-control-button {
    Individual lamp fixtures (frame::after) hang from this track. */
 .lamp-track {
   position: absolute;
-  height: 10px;
+  height: 5px;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.0) 30%),
-    linear-gradient(180deg, #8a959f 0%, #5e6771 55%, #4a5258 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 44%),
+    linear-gradient(180deg, #43484e 0%, #262b30 55%, #171b1f 100%);
   box-shadow:
-    0 5px 14px rgba(0, 0, 0, 0.45),
-    0 2px  5px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+    0 2px 6px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
   pointer-events: none;
 }
 
@@ -485,32 +540,8 @@ body.mobile-ui-active .mobile-control-button {
 }
 
 .wall-layer::before {
-  content: "";
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 20px;
-  height: 9px;
-  border-radius: 999px;
-  background:
-    /* Top highlight edge */
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.0)  30%
-    ),
-    /* Main track body */
-    linear-gradient(
-      180deg,
-      #8a959f 0%,
-      var(--ceiling-track-metal) 55%,
-      #4a5258 100%
-    );
-  box-shadow:
-    0 7px 14px var(--ceiling-track-shadow),
-    0 2px  5px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  /* Hidden: decorative ceiling track rail removed for wall-sconce layout. */
+  display: none;
 }
 
 .wall-layer::after {
@@ -547,6 +578,27 @@ body.mobile-ui-active .mobile-control-button {
   z-index: 10;
 }
 
+.memory-light-layer,
+.memory-exhibit-layer,
+.memory-label-layer {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.memory-light-layer {
+  z-index: 1;
+}
+
+.memory-exhibit-layer {
+  z-index: 2;
+}
+
+.memory-label-layer {
+  z-index: 3;
+}
+
 .entrance-layer {
   position: absolute;
   inset: 0;
@@ -557,24 +609,7 @@ body.mobile-ui-active .mobile-control-button {
 /* Gallery threshold: a subtle pillar/divider at the end of the entrance zone,
    positioned just after the turnstile. Uses --turnstile-left (1120px) + arm width + breathing room. */
 .entrance-layer::after {
-  content: "";
-  position: absolute;
-  left: calc(1270px * var(--scene-scale));
-  top: 0;
-  bottom: calc(90px * var(--scene-scale));
-  width: calc(14px * var(--scene-scale));
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(195, 168, 130, 0.28) 14%,
-    rgba(175, 148, 110, 0.22) 70%,
-    transparent 100%
-  );
-  box-shadow:
-    2px 0 8px rgba(0, 0, 0, 0.14),
-    -1px 0 4px rgba(255, 255, 255, 0.04);
-  pointer-events: none;
-  z-index: 12;
+  display: none;
 }
 
 .entrance-zone {
@@ -818,7 +853,9 @@ body.mobile-ui-active .mobile-control-button {
   background: transparent;
   box-shadow:
     0 8px 18px var(--frame-mounted-shadow),
-    var(--frame-shadow);
+    var(--frame-shadow),
+    /* Wall luminance pool — warm spotlight washing the wall surface around the frame */
+    0 0 0 rgba(0, 0, 0, 0);
   transform-origin: center center;
   transform: rotate(var(--frame-rotate, 0deg));
 }
@@ -835,39 +872,39 @@ body.mobile-ui-active .mobile-control-button {
     /* Aperture source point — warm amber glow at top of cone */
     radial-gradient(
       circle at 50% 6%,
-      rgba(255, 246, 218, 0.55) 0%,
-      rgba(255, 240, 200, 0.35) 5%,
-      rgba(255, 234, 185, 0.18) 12%,
+      var(--spotlight-source) 0%,
+      rgba(255, 240, 204, 0.22) 7%,
+      rgba(255, 236, 190, 0.08) 14%,
       transparent 26%
     ),
     /* Core beam column — main shaft of light */
     radial-gradient(
-      ellipse at 50% 28%,
-      rgba(255, 242, 210, 0.30) 0%,
-      rgba(255, 238, 200, 0.16) 32%,
-      transparent 70%
+      ellipse at 50% 24%,
+      var(--spotlight-core) 0%,
+      rgba(255, 239, 201, 0.12) 28%,
+      transparent 68%
     ),
     /* Lower beam spread — widens toward painting */
     radial-gradient(
-      ellipse at 50% 78%,
-      rgba(255, 240, 200, 0.12) 0%,
-      rgba(255, 238, 195, 0.06) 40%,
+      ellipse at 50% 80%,
+      var(--spotlight-mid) 0%,
+      rgba(255, 238, 195, 0.045) 42%,
       transparent 100%
     ),
     /* Overall cone wash */
     linear-gradient(
       180deg,
-      rgba(255, 241, 206, 0.22) 0%,
-      rgba(255, 241, 206, 0.12) 35%,
-      rgba(255, 241, 206, 0.05) 65%,
+      rgba(255, 241, 206, 0.14) 0%,
+      rgba(255, 241, 206, 0.08) 34%,
+      var(--spotlight-falloff) 68%,
       transparent 100%
     );
-  border-radius: 50% 50% 48% 48% / 12% 12% 88% 88%;
-  -webkit-mask-image: radial-gradient(ellipse at 50% 68%, #000 0%, #000 60%, transparent 100%);
-  mask-image: radial-gradient(ellipse at 50% 68%, #000 0%, #000 60%, transparent 100%);
+  border-radius: 50% 50% 46% 46% / 10% 10% 90% 90%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 70%, #000 0%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(ellipse at 50% 70%, #000 0%, #000 58%, transparent 100%);
   filter: blur(var(--spotlight-blur));
   mix-blend-mode: normal;
-  opacity: 1;
+  opacity: 0.96;
   z-index: 3;
   pointer-events: none;
 }
@@ -881,70 +918,21 @@ body.mobile-ui-active .mobile-control-button {
   height: calc((var(--spotlight-lamp-stem) + var(--spotlight-lamp-size)) * var(--scene-scale));
   transform: translateX(-50%);
 
-  /* ── FIXTURE DESIGN — 4 layered backgrounds (top to bottom): ──────────────
-     1. Ceiling mount bracket — wide flat plate at very top
-     2. Suspension rod — thin centered stem
-     3. Housing cylinder — the main fixture body
-     4. Aperture cap — warm glowing opening at base
-  */
-  background:
-    /* Mount bracket — horizontal bar at ceiling */
-    linear-gradient(
-      180deg,
-      #7a858e 0%,
-      #96a0aa 35%,
-      #7a858e 100%
-    )
-    center top /
-    calc(var(--fixture-mount-w) * var(--scene-scale))
-    calc(9px * var(--scene-scale))
-    no-repeat,
+  /* ── FIXTURE: real PNG asset ────────────────────────────────────────────────
+     lamp_sconce.png is a product photo on white background.
+     mix-blend-mode: darken makes white pixels adopt the dark wall colour
+     (darken = per-channel min; white vs. dark-wall → wall wins, so it
+     vanishes). The black lamp body stays black because black always wins. */
+  background-image: url("assets/objects/lamp_sconce.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
 
-    /* Suspension rod — thin centered strip */
-    linear-gradient(180deg, #96a0aa 0%, #6e7880 100%)
-    center top /
-    calc(3px * var(--scene-scale))
-    calc(var(--spotlight-lamp-stem) * var(--scene-scale))
-    no-repeat,
+  mix-blend-mode: darken;
 
-    /* Housing cylinder — metallic body */
-    radial-gradient(
-      ellipse 88% 100% at 50% 50%,
-      #d2dae0 0%,
-      #a8b2bc 28%,
-      #788088 55%,
-      #525c66 78%,
-      #3c464e 100%
-    )
-    center bottom /
-    calc(var(--fixture-housing-w) * var(--scene-scale))
-    calc(var(--spotlight-lamp-size) * var(--scene-scale))
-    no-repeat,
-
-    /* Aperture warm glow — clearly visible amber light at opening */
-    radial-gradient(
-      circle at 50% 90%,
-      rgba(255, 244, 190, 0.92) 0%,
-      rgba(255, 230, 152, 0.65) 18%,
-      rgba(245, 205, 108, 0.30) 38%,
-      rgba(225, 172, 80,  0.10) 56%,
-      transparent 72%
-    )
-    center bottom /
-    calc(var(--fixture-housing-w) * var(--scene-scale))
-    calc(var(--spotlight-lamp-size) * var(--scene-scale))
-    no-repeat;
-
-  border-top: calc(1px * var(--scene-scale)) solid rgba(210, 220, 228, 0.55);
+  border-top: none;
   border-radius: 0;
-
-  /* Warm downward glow — clearly emanates from the fixture head */
-  box-shadow:
-    0 0  5px  rgba(255, 242, 188, 0.38),
-    0 5px 20px rgba(255, 234, 158, 0.26),
-    0 10px 40px rgba(255, 224, 132, 0.12),
-    0 0  3px  rgba(255, 248, 210, 0.45),
-    0 -2px 6px rgba(255, 238, 175, 0.15);
+  box-shadow: none;
 
   z-index: 4;
   pointer-events: none;
@@ -952,6 +940,189 @@ body.mobile-ui-active .mobile-control-button {
 
 .frame-art {
   display: none;
+}
+
+.frame {
+  box-shadow:
+    0 8px 18px var(--frame-mounted-shadow),
+    var(--frame-shadow);
+}
+
+.frame::before,
+.frame::after {
+  content: none;
+}
+
+.frame-photo-window {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 18px 30px rgba(255, 245, 224, 0.13),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.08);
+}
+
+.frame-shell {
+  filter:
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22))
+    drop-shadow(0 -1px 6px rgba(255, 236, 198, 0.16));
+}
+
+.frame-label {
+  background: rgba(248, 243, 234, 0.985);
+}
+
+.museum-light {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  overflow: visible;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.museum-light::before {
+  content: "";
+  position: absolute;
+  top: var(--wall-glow-top);
+  left: 50%;
+  width: var(--wall-glow-width);
+  height: var(--wall-glow-height);
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at 50% 26%,
+    rgba(255, 244, 222, 0.1) 0%,
+    rgba(255, 241, 214, 0.045) 36%,
+    transparent 72%
+  );
+  opacity: 0.9;
+}
+
+.museum-light::after {
+  content: "";
+  position: absolute;
+  top: var(--floor-glow-top);
+  left: 50%;
+  width: var(--floor-glow-width);
+  height: calc(22px * var(--scene-scale));
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255, 228, 176, 0.085) 0%,
+    rgba(255, 220, 168, 0.028) 48%,
+    transparent 100%
+  );
+  filter: blur(3px);
+  opacity: 0.54;
+}
+
+.museum-light-beam {
+  position: absolute;
+  top: var(--beam-top);
+  left: 50%;
+  width: var(--beam-width);
+  height: var(--beam-height);
+  transform: translateX(-50%);
+  background:
+    radial-gradient(
+      circle at 50% 4%,
+      rgba(255, 245, 222, 0.14) 0%,
+      rgba(255, 241, 210, 0.05) 8%,
+      transparent 16%
+    ),
+    radial-gradient(
+      ellipse at 50% 22%,
+      rgba(255, 241, 210, 0.07) 0%,
+      rgba(255, 239, 204, 0.03) 24%,
+      transparent 56%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 243, 214, 0.085) 0%,
+      rgba(255, 240, 208, 0.04) 24%,
+      rgba(255, 238, 202, 0.016) 52%,
+      transparent 100%
+    );
+  border-radius: 50% 50% 34% 34% / 7% 7% 93% 93%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 76%, #000 0%, #000 42%, transparent 100%);
+  mask-image: radial-gradient(ellipse at 50% 76%, #000 0%, #000 42%, transparent 100%);
+  filter: blur(2px);
+  opacity: 0.86;
+}
+
+.museum-light-fixture {
+  position: absolute;
+  top: var(--fixture-top);
+  left: 50%;
+  width: calc(92px * var(--scene-scale));
+  height: calc(112px * var(--scene-scale));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.museum-light-fixture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(179, 148, 96, 0.18) 0%, rgba(179, 148, 96, 0) 100%)
+    center calc(3px * var(--scene-scale)) /
+    calc(12px * var(--scene-scale))
+    calc(3px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(44, 47, 52, 0.95) 0%, rgba(18, 20, 23, 1) 100%)
+    center calc(8px * var(--scene-scale)) /
+    calc(26px * var(--scene-scale))
+    calc(10px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(188, 194, 200, 0.74) 0%, rgba(88, 95, 102, 0.96) 100%)
+    center calc(14px * var(--scene-scale)) /
+    calc(3px * var(--scene-scale))
+    calc(19px * var(--scene-scale))
+    no-repeat,
+    radial-gradient(circle at 48% 46%,
+      rgba(205, 210, 214, 0.82) 0%,
+      rgba(120, 127, 133, 0.62) 22%,
+      rgba(34, 37, 40, 0.92) 76%,
+      rgba(17, 18, 20, 0.98) 100%
+    )
+    center calc(31px * var(--scene-scale)) /
+    calc(11px * var(--scene-scale))
+    calc(11px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(108, 114, 120, 0.92) 0%, rgba(46, 50, 55, 0.98) 100%)
+    center calc(44px * var(--scene-scale)) /
+    calc(4px * var(--scene-scale))
+    calc(16px * var(--scene-scale))
+    no-repeat;
+}
+
+.museum-light-fixture::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(54px * var(--scene-scale));
+  width: calc(52px * var(--scene-scale));
+  height: calc(24px * var(--scene-scale));
+  transform: translateX(-50%) rotate(-18deg);
+  background:
+    linear-gradient(152deg, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+    radial-gradient(
+      ellipse 95% 100% at 50% 48%,
+      #26292d 0%,
+      #15181b 50%,
+      #08090b 100%
+    ),
+    radial-gradient(
+      ellipse at 48% 94%,
+      rgba(255, 245, 200, 0.16) 0%,
+      rgba(255, 233, 158, 0.045) 24%,
+      transparent 72%
+    );
+  clip-path: polygon(8% 20%, 82% 0%, 100% 82%, 22% 100%);
+  border-radius: 999px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .frame-photo {
@@ -975,8 +1146,9 @@ body.mobile-ui-active .mobile-control-button {
   border-radius: 1px;
   border: 1px solid rgba(24, 20, 16, 0.28);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    inset 0 0 12px var(--art-warm-light);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 18px 30px rgba(255, 245, 224, 0.13),
+    inset 0 0 20px var(--art-warm-light);
   z-index: 1;
   pointer-events: none;
 }
@@ -988,7 +1160,9 @@ body.mobile-ui-active .mobile-control-button {
   height: 100%;
   object-fit: fill;
   image-rendering: auto;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22));
+  filter:
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22))
+    drop-shadow(0 -1px 6px rgba(255, 236, 198, 0.16));
   z-index: 2;
   pointer-events: none;
 }
@@ -1041,64 +1215,217 @@ body.mobile-ui-active .mobile-control-button {
   border-color: #846042;
 }
 
-/* ── Fanus (glass dome) showcase ─────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   Fanus — luxury museum display case
+   Materials: crystal glass dome · brushed brass collar · ebony walnut pedestal
+   Lighting:  warm overhead museum spotlight · contact shadow · brass reflection
+   ══════════════════════════════════════════════════════════════ */
+
 .fanus-exhibit {
   position: absolute;
   width: calc(160px * var(--scene-scale));
   height: calc(240px * var(--scene-scale));
+  will-change: transform;
 }
 
+/* ── Ceiling spotlight cone — from lamp aperture down to dome crown ────────
+   Mirrors the frame::before cone; positioned via JS-set --fanus-cone-h / -w.
+   bottom: 100% anchors the element so its base sits at the fanus top, letting
+   the cone fan upward into the ceiling zone (memory-layer z-index 10 renders
+   above ceiling-layer z-index 2, so the cone is naturally visible). */
+.fanus-exhibit::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: var(--fanus-cone-w, calc(88px * var(--scene-scale)));
+  height: var(--fanus-cone-h, calc(320px * var(--scene-scale)));
+  transform: translateX(-50%);
+  background:
+    /* Aperture source — warm amber glow at the lamp tip */
+    radial-gradient(
+      circle at 50% 6%,
+      var(--spotlight-source) 0%,
+      rgba(255, 240, 202, 0.22) 7%,
+      rgba(255, 236, 188, 0.08) 14%,
+      transparent 26%
+    ),
+    /* Core beam column — main shaft of warm light */
+    radial-gradient(
+      ellipse at 50% 24%,
+      var(--spotlight-core) 0%,
+      rgba(255, 239, 199, 0.12) 28%,
+      transparent 68%
+    ),
+    /* Lower beam spread — opens toward dome crown */
+    radial-gradient(
+      ellipse at 50% 80%,
+      var(--spotlight-mid) 0%,
+      rgba(255, 238, 193, 0.04) 42%,
+      transparent 100%
+    ),
+    /* Overall cone wash */
+    linear-gradient(
+      180deg,
+      rgba(255, 241, 204, 0.11) 0%,
+      rgba(255, 241, 204, 0.07) 34%,
+      var(--spotlight-falloff) 68%,
+      transparent 100%
+    );
+  border-radius: 50% 50% 46% 46% / 10% 10% 90% 90%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 70%, #000 0%, #000 56%, transparent 100%);
+  mask-image: radial-gradient(ellipse at 50% 70%, #000 0%, #000 56%, transparent 100%);
+  filter: blur(var(--spotlight-blur));
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Wall luminance pool — soft warm halo surrounding the dome on the wall — */
+.fanus-exhibit::after {
+  content: "";
+  position: absolute;
+  top: calc(-52px * var(--scene-scale));
+  left: calc(-62px * var(--scene-scale));
+  right: calc(-62px * var(--scene-scale));
+  bottom: calc(-10px * var(--scene-scale));
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    rgba(255, 241, 204, 0.11) 0%,
+    rgba(255, 239, 198, 0.05) 44%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Crystal glass dome ────────────────────────────────────── */
 .fanus-dome {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-  width: calc(116px * var(--scene-scale));
-  height: calc(170px * var(--scene-scale));
-  bottom: calc(52px * var(--scene-scale));
-  border-radius: 50% 50% 0 0 / 52% 52% 0 0;
-  border: 1.5px solid rgba(180, 212, 232, 0.78);
+  transform: translateX(-50%) translateZ(0);
+  width: calc(112px * var(--scene-scale));
+  height: calc(172px * var(--scene-scale));
+  bottom: calc(54px * var(--scene-scale));
+  border-radius: 50% 50% 0 0 / 50% 50% 0 0;
+  /*
+   * Crystal glass reads through four layered backgrounds:
+   *  1. Bright left-edge specular — the defining feature of crystal.
+   *  2. Faint right-edge secondary reflection.
+   *  3. Warm uplight from brass collar rising inside the dome.
+   *  4. Overhead spotlight cone descending from the crown.
+   * The glass body itself is nearly transparent — the object should read clearly.
+   */
+  border: 1px solid rgba(215, 238, 252, 0.72);
   border-bottom: none;
   background:
-    linear-gradient(128deg,
-      rgba(255, 255, 255, 0.50) 0%,
-      rgba(255, 255, 255, 0.05) 38%,
-      transparent 60%),
+    linear-gradient(108deg,
+      rgba(255, 255, 255, 0.60) 0%,
+      rgba(255, 255, 255, 0.16) 14%,
+      transparent 28%),
+    linear-gradient(256deg,
+      rgba(255, 255, 255, 0.11) 0%,
+      transparent 18%),
+    radial-gradient(ellipse 70% 38% at 50% 106%,
+      rgba(196, 152, 58, 0.18) 0%,
+      rgba(170, 128, 44, 0.07) 48%,
+      transparent 70%),
+    radial-gradient(ellipse 52% 72% at 50% -4%,
+      rgba(255, 248, 228, 0.13) 0%,
+      transparent 62%),
     linear-gradient(180deg,
-      rgba(232, 247, 255, 0.14) 0%,
-      rgba(205, 228, 242, 0.04) 100%);
+      rgba(225, 242, 255, 0.06) 0%,
+      rgba(200, 225, 245, 0.02) 100%);
   box-shadow:
-    inset 1px 4px 16px rgba(255, 255, 255, 0.38),
-    0 10px 28px rgba(0, 0, 0, 0.18);
+    /* Crisp left-edge glass line — crystal's signature */
+    inset 2px 0 0 rgba(255, 255, 255, 0.56),
+    /* Faint right edge */
+    inset -1px 0 0 rgba(255, 255, 255, 0.10),
+    /* Top crown catching overhead light */
+    inset 0 6px 24px rgba(255, 255, 255, 0.24),
+    /* Warm brass uplight inside */
+    inset 0 -22px 32px rgba(185, 142, 52, 0.09),
+    /* Outer ambient cast shadow */
+    0 16px 38px rgba(0, 0, 0, 0.18),
+    /* Warm exterior halo — spotlight energy pooling around glass */
+    0 0 20px rgba(200, 158, 78, 0.14),
+    0 0 48px rgba(185, 146, 70, 0.07);
 }
 
-.fanus-dome-glare {
+/* Warm gold seam where glass meets brass collar */
+.fanus-dome::before {
+  content: '';
   position: absolute;
-  top: calc(14px * var(--scene-scale));
-  left: calc(12px * var(--scene-scale));
-  width: calc(30px * var(--scene-scale));
-  height: calc(62px * var(--scene-scale));
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 28%,
-    rgba(255, 255, 255, 0.36) 0%,
+  bottom: 0;
+  left: 4%;
+  right: 4%;
+  height: calc(2px * var(--scene-scale));
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(196, 158, 64, 0.50) 22%,
+    rgba(220, 188, 100, 0.62) 50%,
+    rgba(196, 158, 64, 0.50) 78%,
+    transparent 100%);
+  pointer-events: none;
+}
+
+/* Overhead spotlight — focused cone from crown toward object */
+.fanus-dome::after {
+  content: '';
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 76%;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(255, 248, 224, 0.32) 0%,
+    rgba(255, 243, 210, 0.16) 30%,
+    rgba(255, 238, 195, 0.07) 56%,
     transparent 72%);
   pointer-events: none;
 }
 
-.fanus-object-image {
+/* Primary specular crescent — light catching the curved glass surface */
+.fanus-dome-glare {
   position: absolute;
-  bottom: calc(10px * var(--scene-scale));
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
-  height: auto;
-  max-width: calc(86px * var(--scene-scale));
-  max-height: calc(130px * var(--scene-scale));
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.22));
+  top: calc(10px * var(--scene-scale));
+  left: calc(7px * var(--scene-scale));
+  width: calc(20px * var(--scene-scale));
+  height: calc(74px * var(--scene-scale));
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 34% 16%,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.20) 28%,
+    transparent 60%);
   pointer-events: none;
 }
 
+/* ── Object displayed inside dome ─────────────────────────── */
+.fanus-object-image {
+  position: absolute;
+  bottom: calc(13px * var(--scene-scale));
+  left: 50%;
+  transform: translateX(-50%) translateZ(0);
+  width: auto;
+  height: auto;
+  max-width: calc(84px * var(--scene-scale));
+  max-height: calc(132px * var(--scene-scale));
+  object-fit: contain;
+  object-position: center bottom;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Crisp contact shadow + diffuse ambient lift + warm spotlight rim */
+  filter:
+    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.44))
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22))
+    drop-shadow(0 -1px 5px rgba(210, 168, 84, 0.13));
+  pointer-events: none;
+}
+
+/* ── Fallback shape objects ────────────────────────────────── */
 .fanus-fallback-object {
   position: absolute;
   bottom: calc(14px * var(--scene-scale));
@@ -1126,39 +1453,242 @@ body.mobile-ui-active .mobile-control-button {
   border-radius: 50%;
 }
 
+/* ── Brushed brass collar — dome-to-pedestal junction ─────── */
 .fanus-dome-ring {
   position: absolute;
-  bottom: calc(48px * var(--scene-scale));
+  bottom: calc(50px * var(--scene-scale));
   left: 50%;
   transform: translateX(-50%);
-  width: calc(124px * var(--scene-scale));
-  height: calc(14px * var(--scene-scale));
-  background: linear-gradient(180deg, #b8a898 0%, #8c7d6c 100%);
-  border-radius: 3px;
-  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+  width: calc(122px * var(--scene-scale));
+  height: calc(16px * var(--scene-scale));
+  /* Brushed brass: three-stop gradient simulates cylindrical turned metal */
+  background: linear-gradient(180deg,
+    #d6aa4a 0%,
+    #ba8c36 30%,
+    #9a7228 60%,
+    #c49a3e 84%,
+    #ae8230 100%);
+  border-radius: 2px;
+  box-shadow:
+    0 5px 12px rgba(0, 0, 0, 0.32),
+    0 2px 4px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 228, 130, 0.42),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
 }
 
+/* Engraved trim line — a single precision groove in the brass */
+.fanus-dome-ring::before {
+  content: '';
+  position: absolute;
+  top: 42%;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(0, 0, 0, 0.22) 18%,
+    rgba(0, 0, 0, 0.22) 82%,
+    transparent);
+}
+
+/* ── Dark ebony walnut pedestal ───────────────────────────── */
 .fanus-pedestal {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(148px * var(--scene-scale));
-  height: calc(48px * var(--scene-scale));
-  background: linear-gradient(180deg, #7e7268 0%, #524945 100%);
-  border-radius: 6px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  width: calc(146px * var(--scene-scale));
+  height: calc(52px * var(--scene-scale));
+  /* Deep walnut: near-black with a faint warm undertone */
+  background: linear-gradient(180deg,
+    #2c2218 0%,
+    #211a12 35%,
+    #18130e 72%,
+    #120e0a 100%);
+  border-radius: 4px 4px 3px 3px;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.42),
+    0 4px 8px rgba(0, 0, 0, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.03),
+    inset -1px 0 0 rgba(255, 255, 255, 0.02);
 }
 
+/* Gold inlay band at pedestal top — the brass accent line */
 .fanus-pedestal::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 1px;
+  left: 0;
+  right: 0;
+  height: calc(4px * var(--scene-scale));
+  background: linear-gradient(180deg,
+    #c89236 0%,
+    #a87428 100%);
+  border-radius: 4px 4px 0 0;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 218, 100, 0.30);
+}
+
+/* Subtle side-face sheen on the wood body */
+.fanus-pedestal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.06) 100%);
+  border-radius: 4px 4px 3px 3px;
+  pointer-events: none;
+}
+
+.fanus-exhibit::before,
+.fanus-exhibit::after {
+  content: none;
+}
+
+.museum-light--fanus .museum-light-fixture::after {
+  width: calc(34px * var(--scene-scale));
+}
+
+.museum-light--fanus .museum-light-fixture {
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* Lighting Reset: final clean premium museum rig */
+.lamp-track {
+  height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, #3a4046 0%, #20252a 58%, #14181c 100%);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.museum-light {
+  isolation: isolate;
+}
+
+.museum-light::before {
+  top: var(--wall-glow-top);
+  width: var(--wall-glow-width);
+  height: var(--wall-glow-height);
+  background: radial-gradient(
+    ellipse at 50% 24%,
+    rgba(255, 244, 224, 0.055) 0%,
+    rgba(255, 241, 214, 0.02) 34%,
+    transparent 68%
+  );
+  opacity: 0.8;
+}
+
+.museum-light::after {
+  top: var(--floor-glow-top);
+  width: var(--floor-glow-width);
+  height: calc(16px * var(--scene-scale));
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255, 225, 170, 0.07) 0%,
+    rgba(255, 220, 168, 0.018) 46%,
+    transparent 100%
+  );
+  filter: blur(3px);
+  opacity: 0.46;
+}
+
+.museum-light-beam {
+  width: var(--beam-width);
+  background:
+    radial-gradient(
+      circle at 50% 3%,
+      rgba(255, 245, 224, 0.1) 0%,
+      rgba(255, 241, 212, 0.03) 10%,
+      transparent 18%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 243, 214, 0.055) 0%,
+      rgba(255, 240, 208, 0.026) 26%,
+      rgba(255, 238, 202, 0.01) 54%,
+      transparent 100%
+    );
+  border-radius: 50% 50% 28% 28% / 6% 6% 94% 94%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 78%, #000 0%, #000 38%, transparent 100%);
+  mask-image: radial-gradient(ellipse at 50% 78%, #000 0%, #000 38%, transparent 100%);
+  filter: blur(1.5px);
+  opacity: 0.72;
+}
+
+.museum-light-fixture {
+  width: calc(74px * var(--scene-scale));
+  height: calc(92px * var(--scene-scale));
+}
+
+.museum-light-fixture::before {
+  background:
+    linear-gradient(180deg, rgba(176, 145, 94, 0.14) 0%, rgba(176, 145, 94, 0) 100%)
+    center calc(3px * var(--scene-scale)) /
+    calc(12px * var(--scene-scale))
+    calc(2px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(170, 176, 182, 0.72) 0%, rgba(78, 84, 90, 0.96) 100%)
+    center calc(9px * var(--scene-scale)) /
+    calc(3px * var(--scene-scale))
+    calc(16px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(38, 42, 46, 0.96) 0%, rgba(16, 18, 21, 1) 100%)
+    center calc(6px * var(--scene-scale)) /
+    calc(22px * var(--scene-scale))
+    calc(8px * var(--scene-scale))
+    no-repeat,
+    radial-gradient(circle at 50% 50%,
+      rgba(194, 198, 202, 0.78) 0%,
+      rgba(99, 105, 111, 0.5) 24%,
+      rgba(27, 30, 33, 0.92) 78%,
+      rgba(15, 17, 19, 1) 100%
+    )
+    center calc(28px * var(--scene-scale)) /
+    calc(10px * var(--scene-scale))
+    calc(10px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(104, 110, 116, 0.88) 0%, rgba(42, 46, 50, 0.98) 100%)
+    center calc(40px * var(--scene-scale)) /
+    calc(4px * var(--scene-scale))
+    calc(12px * var(--scene-scale))
+    no-repeat;
+}
+
+.museum-light-fixture::after {
+  top: calc(48px * var(--scene-scale));
+  width: calc(42px * var(--scene-scale));
+  height: calc(20px * var(--scene-scale));
+  transform: translateX(-50%) rotate(-20deg);
+  background:
+    linear-gradient(152deg, rgba(255, 255, 255, 0.045) 0%, transparent 42%),
+    radial-gradient(
+      ellipse 98% 100% at 50% 48%,
+      #22262a 0%,
+      #121519 52%,
+      #070809 100%
+    ),
+    radial-gradient(
+      ellipse at 48% 94%,
+      rgba(255, 244, 202, 0.12) 0%,
+      rgba(255, 233, 160, 0.03) 24%,
+      transparent 72%
+    );
+  clip-path: polygon(8% 18%, 84% 0%, 100% 82%, 20% 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.36),
+    0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.museum-light--fanus .museum-light-fixture::after {
+  width: calc(38px * var(--scene-scale));
 }
 
 .tape-exhibit {
@@ -1194,8 +1724,11 @@ body.mobile-ui-active .mobile-control-button {
     linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.12) 100%),
     url("assets/textures/floor_wood.png") repeat-x left bottom / auto 100%,
     linear-gradient(180deg, var(--gallery-floor-top) 0%, var(--gallery-floor-bottom) 100%);
-  border-top: 3px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 12px 16px rgba(255, 255, 255, 0.06);
+  /* Warm border line — parquet catching overhead lamplight */
+  border-top: 3px solid rgba(210, 174, 108, 0.16);
+  box-shadow:
+    inset 0 12px 22px rgba(255, 226, 164, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .floor::before {
@@ -1950,4 +2483,190 @@ body.mobile-ui-active .mobile-control-button {
     padding: 12px 28px;
     font-size: 0.85rem;
   }
+}
+
+/* Museum Lighting State */
+.game-root .ambient-layer {
+  transition: opacity 900ms cubic-bezier(0.22, 0.8, 0.36, 1);
+}
+
+.game-root.museum-lit .ambient-layer {
+  opacity: 0.72;
+}
+
+.game-root .lamp-track,
+.game-root .museum-light::before,
+.game-root .museum-light::after,
+.game-root .museum-light-beam,
+.game-root .museum-light-fixture {
+  transition:
+    opacity 900ms cubic-bezier(0.22, 0.8, 0.36, 1),
+    transform 900ms cubic-bezier(0.22, 0.8, 0.36, 1),
+    filter 900ms ease;
+}
+
+.game-root:not(.museum-lit) .lamp-track,
+.game-root:not(.museum-lit) .museum-light::before,
+.game-root:not(.museum-lit) .museum-light::after,
+.game-root:not(.museum-lit) .museum-light-beam {
+  opacity: 0 !important;
+}
+
+.game-root:not(.museum-lit) .museum-light-fixture {
+  opacity: 0.18 !important;
+  filter: brightness(0.32) saturate(0.7) !important;
+}
+
+.game-root.museum-lit .lamp-track {
+  opacity: 1;
+}
+
+/* Final Lighting Override */
+.museum-light::before {
+  background: radial-gradient(
+    ellipse at 50% 28%,
+    rgba(255, 244, 220, 0.16) 0%,
+    rgba(255, 239, 208, 0.08) 30%,
+    rgba(255, 235, 198, 0.025) 52%,
+    transparent 74%
+  ) !important;
+  opacity: 1 !important;
+}
+
+.museum-light::after {
+  height: calc(24px * var(--scene-scale)) !important;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255, 226, 168, 0.16) 0%,
+    rgba(255, 216, 150, 0.06) 44%,
+    transparent 100%
+  ) !important;
+  filter: blur(5px) !important;
+  opacity: 0.85 !important;
+}
+
+.museum-light-beam {
+  background:
+    radial-gradient(
+      circle at 50% 2%,
+      rgba(255, 248, 228, 0.34) 0%,
+      rgba(255, 243, 214, 0.16) 8%,
+      transparent 18%
+    ),
+    radial-gradient(
+      ellipse at 50% 24%,
+      rgba(255, 243, 214, 0.16) 0%,
+      rgba(255, 239, 205, 0.08) 24%,
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 245, 220, 0.16) 0%,
+      rgba(255, 241, 210, 0.09) 22%,
+      rgba(255, 238, 202, 0.035) 50%,
+      transparent 100%
+    ) !important;
+  border-radius: 50% 50% 32% 32% / 5% 5% 95% 95% !important;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 78%, #000 0%, #000 44%, transparent 100%) !important;
+  mask-image: radial-gradient(ellipse at 50% 78%, #000 0%, #000 44%, transparent 100%) !important;
+  filter: blur(3px) !important;
+  opacity: 1 !important;
+}
+
+.museum-light-fixture {
+  width: calc(108px * var(--scene-scale)) !important;
+  height: calc(132px * var(--scene-scale)) !important;
+}
+
+.museum-light-fixture::before {
+  background:
+    linear-gradient(180deg, rgba(188, 154, 96, 0.22) 0%, rgba(188, 154, 96, 0) 100%)
+    center calc(4px * var(--scene-scale)) /
+    calc(14px * var(--scene-scale))
+    calc(3px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(46, 49, 54, 0.98) 0%, rgba(18, 20, 23, 1) 100%)
+    center calc(10px * var(--scene-scale)) /
+    calc(30px * var(--scene-scale))
+    calc(12px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(200, 205, 210, 0.82) 0%, rgba(88, 94, 100, 0.98) 100%)
+    center calc(16px * var(--scene-scale)) /
+    calc(4px * var(--scene-scale))
+    calc(22px * var(--scene-scale))
+    no-repeat,
+    radial-gradient(circle at 50% 50%,
+      rgba(214, 218, 222, 0.92) 0%,
+      rgba(122, 128, 134, 0.62) 22%,
+      rgba(28, 31, 34, 0.94) 78%,
+      rgba(14, 16, 18, 1) 100%
+    )
+    center calc(36px * var(--scene-scale)) /
+    calc(12px * var(--scene-scale))
+    calc(12px * var(--scene-scale))
+    no-repeat,
+    linear-gradient(180deg, rgba(112, 118, 124, 0.95) 0%, rgba(44, 48, 52, 1) 100%)
+    center calc(52px * var(--scene-scale)) /
+    calc(5px * var(--scene-scale))
+    calc(20px * var(--scene-scale))
+    no-repeat !important;
+}
+
+.museum-light-fixture::after {
+  top: calc(62px * var(--scene-scale)) !important;
+  width: calc(62px * var(--scene-scale)) !important;
+  height: calc(30px * var(--scene-scale)) !important;
+  transform: translateX(-50%) rotate(-20deg) !important;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.08) 0%, transparent 42%),
+    radial-gradient(
+      ellipse 98% 100% at 50% 48%,
+      #272b2f 0%,
+      #14181b 52%,
+      #070809 100%
+    ),
+    radial-gradient(
+      ellipse at 50% 96%,
+      rgba(255, 247, 210, 0.38) 0%,
+      rgba(255, 235, 168, 0.12) 26%,
+      rgba(255, 220, 148, 0.03) 46%,
+      transparent 74%
+    ) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.42),
+    0 0 10px rgba(255, 232, 172, 0.12) !important;
+}
+
+.frame-photo-window {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 24px 38px rgba(255, 247, 228, 0.2),
+    inset 0 0 30px rgba(255, 241, 206, 0.08),
+    inset 0 -12px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+.frame-shell {
+  filter:
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22))
+    drop-shadow(0 -2px 8px rgba(255, 238, 192, 0.24))
+    drop-shadow(0 0 8px rgba(255, 227, 156, 0.08)) !important;
+}
+
+.game-root.museum-lit .museum-light::before {
+  opacity: 1 !important;
+}
+
+.game-root.museum-lit .museum-light::after {
+  opacity: 0.85 !important;
+}
+
+.game-root.museum-lit .museum-light-beam {
+  opacity: 1 !important;
+}
+
+.game-root.museum-lit .museum-light-fixture {
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 3px 6px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 8px rgba(255, 230, 176, 0.08)) !important;
 }

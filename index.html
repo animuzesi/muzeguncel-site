@@ -14,6 +14,8 @@
     <main class="game-root" hidden>
       <!-- Müze içini bilet doğrulanana kadar örten nazik karartma perdesi -->
       <div id="gallery-veil" class="gallery-veil" aria-hidden="true"></div>
+      <!-- Bilet alınmadan görünen gizemli çerçeve ipucu -->
+      <div id="teaser-peek" class="teaser-peek" aria-hidden="true"></div>
       <!-- Viewport, kameranın gördüğü alan -->
       <div id="viewport" class="viewport">
         <!-- Dünya viewport'tan daha geniş -->
@@ -88,6 +90,7 @@
 
     <div id="ticket-panel" class="ticket-panel" hidden aria-modal="true" role="dialog" aria-label="Bilet doğrulama">
       <div class="ticket-panel-box">
+        <button id="ticket-close" class="ticket-panel-close" type="button" aria-label="Kapat">×</button>
         <h2 class="ticket-panel-title">Bilet Doğrulama</h2>
         <p class="ticket-panel-hint">Bilet numaranı girerek içeri geçebilirsin.</p>
         <input
